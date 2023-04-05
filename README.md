@@ -1,6 +1,6 @@
-- Python File: For simplicity of testing for everyone, kept this version as only one file - the main.py code. 
+- Python File: For simplicity of testing for everyone, kept this version as only one file - the main.py code. Plan to make it more object-oriented later once components get added.
 
-- Database Download: For the db it refers to, do download the MIHA db with all columns on Torque and rename it "MIHA.csv". Keep it in the same folder as main.py. Ideally would make it more object-oriented.
+- Database Download: For the db it refers to, do download the MIHA db with all columns on Torque and rename it "MIHA.csv". Keep it in the same folder as main.py.
 
 - Choice of DB: Chose MIHA database. In the db, I found a lot of rows where there were textual values that were about something else in columns like 'Peer Score' and 'Panel Score' instead of the score themselves. Such rows have been pushed and ranked down in the code. Would love to know if there was a reason why those rows didn't have numeric scores. 
 
