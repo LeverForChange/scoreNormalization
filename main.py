@@ -177,7 +177,7 @@ table = remove_outliers(table, 'Panel Score')
 
 
 
-# We normalize Peer Score and Panel Score. We use Min-Max Normalization, which was found to be the most efficient Normalization technique previously during the MIHA exercise in October
+# We normalize Peer Score and Panel Score respectively. We use Min-Max Normalization, which was found to be the more effective Normalization technique for us previously during the MIHA exercise in October
 table['Normalized Peer Score'] = (table['Peer Score'] - table['Peer Score'].min()) / (table['Peer Score'].max() - table['Peer Score'].min())
 table['Normalized Panel Score'] = (table['Panel Score'] - table['Panel Score'].min()) / (table['Panel Score'].max() - table['Panel Score'].min())
 
