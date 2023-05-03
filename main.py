@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
+import datetime
 
-
-#API for importing data from Toque, all commented for now as focus is on finalizing the logic
+#API for importing data from Torque, all commented for now as focus is on finalizing the logic
 
 """
 from torqueclient import Torque
@@ -147,56 +147,38 @@ if __name__ == "__main__":
 """
 
 
-
-# We read the input CSV file with only the specified columns. These columns can be changed based on our preferences. The reason to choose only these was understood based on how Analysts operate.
-input_file = "MIHA.csv"
-columns_to_read = ['Application #', 'Organization Name', 'Peer Score', 'Peer Rank', 'Panel Score', 'Panel Rank', 'Rank']
+input_file = "MIHA_panel.csv"
+columns_to_read = ['Application #', 'Organization', 'Judge Name', 'Anonymous Judge Name', 'Trait', 'Trait Score', 'Overall Score Rank']
 table = pd.read_csv(input_file, usecols=columns_to_read)
 
+# We normalize scores using min-max method for each judge
+min_max_normalized_scores = table.groupby("Anonymous Judge Name")["Trait Score"].transform(lambda x: (x - x.min()) / (x.max() - x.min()))
 
+# We normalize scores using z-score method for each judge
+z_score_normalized_scores = table.groupby("Anonymous Judge Name")["Trait Score"].transform(lambda x: (x - x.mean()) / x.std())
 
-# We convert non-numeric and non-float values to 0. We do this since Torque database download has a lot of entries with textual values in Peer and Panel Scores' columns.
-table['Peer Score'] = pd.to_numeric(table['Peer Score'], errors='coerce').fillna(0)
-table['Panel Score'] = pd.to_numeric(table['Panel Score'], errors='coerce').fillna(0)
+# Add normalized scores to our Table
+table["Min-Max Normalized Score"] = min_max_normalized_scores
+table["Z-Score Normalized Score"] = z_score_normalized_scores
 
+# We pivot our Table to get scores by trait
+pivoted_table = table.pivot_table(index=["Application #", "Organization"], columns="Trait", values=["Trait Score", "Min-Max Normalized Score", "Z-Score Normalized Score"], aggfunc="mean")
 
+# Calculate the overall sum of normalized scores per normalization style
+pivoted_table["Min-Max Overall Score"] = pivoted_table["Min-Max Normalized Score"].sum(axis=1)
+pivoted_table["Z-Score Overall Score"] = pivoted_table["Z-Score Normalized Score"].sum(axis=1)
 
-# Remove extreme outliers for Peer and Panel scores
-def remove_outliers(df, column):
-    Q1 = df[column].quantile(0.25)
-    Q3 = df[column].quantile(0.75)
-    IQR = Q3 - Q1
-    lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
-    return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+# We rank applications by the overall score
+pivoted_table["Min-Max Rank"] = pivoted_table["Min-Max Overall Score"].rank(ascending=False)
+pivoted_table["Z-Score Rank"] = pivoted_table["Z-Score Overall Score"].rank(ascending=False)
 
+# We reset the index and print the output table
+output_table = pivoted_table.reset_index()
+print(output_table)
 
-table = remove_outliers(table, 'Peer Score')
-table = remove_outliers(table, 'Panel Score')
-
-
-
-
-# We normalize Peer Score and Panel Score respectively. We use Min-Max Normalization, which was found to be the more effective Normalization technique for us previously during the MIHA exercise in October
-table['Normalized Peer Score'] = (table['Peer Score'] - table['Peer Score'].min()) / (table['Peer Score'].max() - table['Peer Score'].min())
-table['Normalized Panel Score'] = (table['Panel Score'] - table['Panel Score'].min()) / (table['Panel Score'].max() - table['Panel Score'].min())
-
-
-
-# We calculate the normalized score as the average of normalized peer score and normalized panel score
-table['Normalized Score'] = (table['Normalized Peer Score'] + table['Normalized Panel Score']) / 2
-
-
-
-# We sort the above by normalized score in descending order
-table = table.sort_values(by='Normalized Score', ascending=False)
-
-
-
-# Here, we assign the normalized rank based on the above sorting
-table['Normalized Rank'] = table['Normalized Score'].rank(ascending=False)
-
+# We get the current timestamp and append it to the output file name
+current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+output_file = f"MIHA_Normalized_{current_timestamp}.csv"
 
 # We save the output to a new CSV file (Later we integrate this in Torque UI to make it clickable download)
-output_file = "MIHA_Scores_Normalized.csv"
-table.to_csv(output_file, index=False)
+output_table.to_csv(output_file, index=False)
