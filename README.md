@@ -14,8 +14,8 @@ In the context of our script, the scores given by different judges are being nor
 Kurtosis measures the "tailedness" of the distribution. A high kurtosis value indicates a distribution with heavy tails, which means there are more outliers. A low kurtosis value indicates a distribution with light tails, meaning fewer outliers._)
 
 **To summarize**, the script follows the following steps:
-1.	Import necessary libraries: pandas, numpy, datetime, seaborn, and matplotlib.
-2.	Read data from a CSV file ("data.csv") into a Pandas DataFrame, selecting specific columns defined in the "columns_to_read" list.
+1.	Import necessary libraries: pandas, numpy, datetime, seaborn, torque, and matplotlib.
+2.	Read data from Torque API into a Pandas DataFrame, selecting specific columns defined in the "columns_to_read" list.
 3.	Rename the column "Trait Score" to "Raw Trait Score" in the DataFrame.
 4.	Check for missing data in the DataFrame and print the count of missing values for each column.
 5.	Fill missing values in the "Raw Trait Score" column with the median of that column.
