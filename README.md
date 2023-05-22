@@ -1,4 +1,4 @@
-This Python program, overall, reads data using the Torque API, handles missing values and outliers, calculates statistics, normalizes scores using two techniques - Min-Max normalization and Z-score normalization, performs data pivoting, calculates overall scores, ranks applications, and saves the results in a new CSV file. 
+This open source Python program, overall, reads data using the Torque API, handles missing values and outliers, calculates statistics, normalizes scores using two techniques - Min-Max normalization and Z-score normalization, performs data pivoting, calculates overall scores, ranks applications, and saves the results in a new CSV file. 
 
 We use the following normalization techniques used in the code:
 •	Min-Max Normalization: This method scales the data to a fixed range, usually 0 to 1. It is useful when you know the boundaries of the input variables, which helps scale the output but maintains the original distribution. The drawback of this method is that it does not handle outliers very well. 
