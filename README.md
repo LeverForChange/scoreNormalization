@@ -4,6 +4,21 @@ See [DESIGN.md](DESIGN.md) for more information.
 
 # Usage
 
-Update the variables `link`, `username`, `apikey`, and `competition_name` in main.py
+Copy `config.py.tmpl` to `config.py` and update the variables
 
-Run via `python main.py`
+```
+$ cp config.py.tmpl config.py
+$ $EDITOR config.py
+```
+
+Install dependencies
+
+```
+$ pip install pandas numpy seaborn matplotlib
+```
+
+Run
+
+```
+$ python main.py
+```
