@@ -4,21 +4,17 @@ import numpy as np
 import datetime
 import seaborn as sns
 import matplotlib.pyplot as plt
+import config
 
 torque = Torque(
-    "link",
-    "username",
-    "apikey"
+    config.TORQUE_LINK,
+    config.TORQUE_USERNAME,
+    config.TORQUE_API_KEY
 )
 
-COMPETITION = "competition_name"
+COMPETITION = config.COMPETITION
 
-JUDGE_DATA_TYPES = [
-    "COMMUNITY-INFORMED",
-    "IMPACTFUL",
-    "FEASIBLE",
-    "SUSTAINABLE",
-]
+JUDGE_DATA_TYPES = config.JUDGE_DATA_TYPES
 
 def get_proposal_judge_data():
     """Gets the raw judge scoring data for all proposals in a dictionary mapping the proposal key
@@ -135,7 +131,7 @@ def main():
 
     # We get the current timestamp and append it to the output file name
     current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    output_file = f"BaWoP_Normalized_{current_timestamp}.csv"
+    output_file = f"{COMPETITION}_Normalized_{current_timestamp}.csv"
 
     # We save the output to a new CSV file
     table.to_csv(output_file, index=False)
