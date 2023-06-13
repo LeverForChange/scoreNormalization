@@ -1,4 +1,4 @@
-# Import necessary libraries
+# We import necessary libraries
 import pandas as pd
 from sklearn import preprocessing
 from torqueclient import Torque
@@ -20,6 +20,7 @@ JUDGE_DATA_TYPES = [
     "SUSTAINABLE",
 ]
 
+#We fetch all application data for the competition through Torque API
 def get_proposal_judge_data():
     judge_data_by_proposal = {}
     for proposal in torque.competitions[COMPETITION].proposals:
