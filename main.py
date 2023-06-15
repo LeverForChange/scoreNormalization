@@ -1,4 +1,6 @@
 # We import necessary libraries
+
+from torqueclient import Torque
 import pandas as pd
 from sklearn import preprocessing
 from torqueclient import Torque
@@ -61,7 +63,7 @@ def extract_scores(df):
 
         df[trait + ' Z-score Normalized Score'] = normalize_data(df, trait + ' Rawscore', 'zscore')
         df[trait + ' Min-Max Normalized Score'] = normalize_data(df, trait + ' Rawscore', 'min-max')
-    
+
     # We calculate total rawscore and total normalized score for each row and add them as new columns
     # We compute the rank for the total scores and add them as new columns
     df['Total Rawscore'] = df[[trait + ' Rawscore' for trait in traits]].sum(axis=1)
@@ -69,23 +71,27 @@ def extract_scores(df):
 
     df['Total Z-Score Normalized Score'] = df[[trait + ' Z-score Normalized Score' for trait in traits]].sum(axis=1)
     df['Rank by Total Z-Score Normalized Score'] = df['Total Z-Score Normalized Score'].rank(method='min', ascending=False)
-    
+
     df['Total Min-Max Normalized Score'] = df[[trait + ' Min-Max Normalized Score' for trait in traits]].sum(axis=1)
     df['Rank by Total Min-Max Normalized Score'] = df['Total Min-Max Normalized Score'].rank(method='min', ascending=False)
-    
+
     return df
 
-# We read the csv file into a pandas DataFrame
-torque.bulk_fetch(torque.competitions[COMPETITION].proposals)
-df = get_proposal_judge_data()
-table = pd.DataFrame(df).transpose().reset_index()
+def main():
+    # We read the csv file into a pandas DataFrame
+    torque.bulk_fetch(torque.competitions[COMPETITION].proposals)
+    df = get_proposal_judge_data()
+    table = pd.DataFrame(df).transpose().reset_index()
 
-# We use the function we defined to extract and process the scores
-table = extract_scores(table)
+    # We use the function we defined to extract and process the scores
+    table = extract_scores(table)
 
-# We save the processed data back to a new csv file
-current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-output_file = f"{COMPETITION}_Normalized_{current_timestamp}.csv"
-table.to_csv(output_file, index=False)
+    # We save the processed data back to a new csv file
+    current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    output_file = f"{COMPETITION}_Normalized_{current_timestamp}.csv"
+    table.to_csv(output_file, index=False)
 
-print("Normalization done, and the new file is saved!")
+    print("Normalization done, and the new file is saved!")
+
+if __name__ == "__main__":
+    main()
