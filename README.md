@@ -1,4 +1,4 @@
-This open source Python program, overall, reads data using the Torque API, handles missing values and outliers, calculates statistics, normalizes scores using two techniques - Min-Max normalization and Z-score normalization, performs data pivoting, calculates overall scores, ranks applications, and saves the results in a new CSV file. 
+This open source Python program, overall, reads data using the Torque API, handles missing values and outliers, calculates statistics, normalizes scores using two techniques - Min-Max normalization and Z-score normalization, performs data pivoting, calculates overall scores, ranks applications, and saves the results back up to Torque. 
 
 See [DESIGN.md](DESIGN.md) for more information.
 
@@ -20,5 +20,7 @@ $ pip install pandas numpy seaborn matplotlib
 Run
 
 ```
-$ python main.py
+$ python main.py [--csv]
 ```
+
+The `--csv` option is to output the result to a csv file rather than uploading to torque.

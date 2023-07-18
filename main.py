@@ -8,6 +8,18 @@ import numpy as np
 import datetime
 import config
 
+__doc__ = """
+Normalize competition scores and upload
+
+Usage:
+
+  $ python main.py [--csv]
+
+Command-line options:
+  --csv                     Output to CSV rather than uploading results back to torque
+
+"""
+
 torque = Torque(
     config.TORQUE_LINK,
     config.TORQUE_USERNAME,
@@ -85,7 +97,7 @@ def extract_scores(df):
 
     return df
 
-def main():
+def main(output_to_csv):
     # We read the csv file into a pandas DataFrame
     torque.bulk_fetch(torque.competitions[COMPETITION].proposals)
     df = get_proposal_judge_data()
@@ -94,22 +106,48 @@ def main():
     # We use the function we defined to extract and process the scores
     table = extract_scores(table)
 
-    # We save the processed data back to a new csv file
-    current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    output_file = f"{COMPETITION}_Normalized_{current_timestamp}.csv"
 
-    for record in table.to_dict(orient='records'):
-        current_rank = torque.competitions[COMPETITION].proposals[record["index"]]["%s Rank" % SCORE_TYPE]
-        current_score = torque.competitions[COMPETITION].proposals[record["index"]]["%s Score" % SCORE_TYPE]
-        current_score["LFC Min-Max Normalized"] = round(record["Total Min-Max Normalized Score"] * 25, 1)
-        current_rank["LFC Min-Max Normalized"] = record["Rank by Total Min-Max Normalized Score"]
-        current_score["LFC Z-Score Normalized"] = round(record["Total Z-Score Normalized Score"], 3)
-        current_rank["LFC Z-Score Normalized"] = record["Rank by Total Z-Score Normalized Score"]
-        torque.competitions[COMPETITION].proposals[record["index"]]["%s Rank" % SCORE_TYPE] = current_rank
-        torque.competitions[COMPETITION].proposals[record["index"]]["%s Score" % SCORE_TYPE] = current_score
-    #table.to_csv(output_file, index=False)
-
-    print("Normalization done, and the new file is saved!")
+    if output_to_csv:
+        # We save the processed data back to a new csv file
+        current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        output_file = f"{COMPETITION}_Normalized_{current_timestamp}.csv"
+        table.to_csv(output_file, index=False)
+        print("Normalization done, and the results are saved in %s!" % output_file)
+    else:
+        for record in table.to_dict(orient='records'):
+            current_rank = torque.competitions[COMPETITION].proposals[record["index"]]["%s Rank" % SCORE_TYPE]
+            current_score = torque.competitions[COMPETITION].proposals[record["index"]]["%s Score" % SCORE_TYPE]
+            current_score["LFC Min-Max Normalized"] = round(record["Total Min-Max Normalized Score"] * 25, 1)
+            current_rank["LFC Min-Max Normalized"] = record["Rank by Total Min-Max Normalized Score"]
+            current_score["LFC Z-Score Normalized"] = round(record["Total Z-Score Normalized Score"], 3)
+            current_rank["LFC Z-Score Normalized"] = record["Rank by Total Z-Score Normalized Score"]
+            torque.competitions[COMPETITION].proposals[record["index"]]["%s Rank" % SCORE_TYPE] = current_rank
+            torque.competitions[COMPETITION].proposals[record["index"]]["%s Score" % SCORE_TYPE] = current_score
+        print("Normalization done, and results are back on torque")
 
 if __name__ == "__main__":
-    main()
+    import getopt
+    import sys
+
+    try:
+        opts, args = getopt.getopt(
+            sys.argv[1:],
+            "",
+            [
+                "csv",
+            ],
+        )
+    except getopt.GetoptError as err:
+        sys.stderr.write("ERROR: '%s'\n" % err)
+        sys.exit(2)
+
+    output_to_csv = False
+    for o, a in opts:
+        if o == "--csv":
+            output_to_csv = True
+        else:
+            sys.stderr.write("ERROR: unrecognized option '%s'\n" % o)
+            sys.stderr.write(__doc__)
+            sys.exit(2)
+
+    main(output_to_csv)
