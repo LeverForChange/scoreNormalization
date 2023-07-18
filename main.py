@@ -23,6 +23,13 @@ JUDGE_DATA_TYPES = config.JUDGE_DATA_TYPES
 def get_proposal_judge_data():
     judge_data_by_proposal = {}
     for proposal in torque.competitions[COMPETITION].proposals:
+        if (
+            ("%s Score" % SCORE_TYPE) not in proposal.keys() or
+            "Raw" not in proposal["%s Score" % SCORE_TYPE] or
+            not proposal["%s Score" % SCORE_TYPE]["Raw"]
+        ):
+            continue
+
         judge_data = {}
 
         for judge_data_type in JUDGE_DATA_TYPES:
