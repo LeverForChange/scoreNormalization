@@ -89,7 +89,17 @@ def main():
     # We save the processed data back to a new csv file
     current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     output_file = f"{COMPETITION}_Normalized_{current_timestamp}.csv"
-    table.to_csv(output_file, index=False)
+
+    for record in table.to_dict(orient='records'):
+        current_rank = torque.competitions[COMPETITION].proposals[record["index"]]["%s Rank" % SCORE_TYPE]
+        current_score = torque.competitions[COMPETITION].proposals[record["index"]]["%s Score" % SCORE_TYPE]
+        current_score["LFC Min-Max Normalized"] = round(record["Total Min-Max Normalized Score"] * 25, 1)
+        current_rank["LFC Min-Max Normalized"] = record["Rank by Total Min-Max Normalized Score"]
+        current_score["LFC Z-Score Normalized"] = round(record["Total Z-Score Normalized Score"], 3)
+        current_rank["LFC Z-Score Normalized"] = record["Rank by Total Z-Score Normalized Score"]
+        torque.competitions[COMPETITION].proposals[record["index"]]["%s Rank" % SCORE_TYPE] = current_rank
+        torque.competitions[COMPETITION].proposals[record["index"]]["%s Score" % SCORE_TYPE] = current_score
+    #table.to_csv(output_file, index=False)
 
     print("Normalization done, and the new file is saved!")
 
