@@ -16,6 +16,7 @@ torque = Torque(
 
 COMPETITION = config.COMPETITION
 
+SCORE_TYPE = config.SCORE_TYPE
 JUDGE_DATA_TYPES = config.JUDGE_DATA_TYPES
 
 #We fetch all application data for the competition through Torque API
@@ -26,8 +27,8 @@ def get_proposal_judge_data():
 
         for judge_data_type in JUDGE_DATA_TYPES:
             judge_data[judge_data_type] = []
-            if proposal["Panel %s Judge Data" % judge_data_type]:
-                for torque_judge_datum in proposal["Panel %s Judge Data" % judge_data_type]["Comments"]:
+            if proposal["%s %s Judge Data" % (SCORE_TYPE, judge_data_type)]:
+                for torque_judge_datum in proposal["%s %s Judge Data" % (SCORE_TYPE, judge_data_type)]["Comments"]:
                     judge_data[judge_data_type].append({
                         "judgename": torque_judge_datum["Anonymous Judge Name"],
                         "rawscore": torque_judge_datum["Score"]["Raw"],
