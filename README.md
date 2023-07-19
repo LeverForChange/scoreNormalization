@@ -11,16 +11,22 @@ $ cp config.py.tmpl config.py
 $ $EDITOR config.py
 ```
 
-Install dependencies
+## Install dependencies
 
 ```
-$ pip install pandas numpy seaborn matplotlib
+$ pip install pandas numpy seaborn matplotlib torqueclient
 ```
 
-Run
+## Run
 
 ```
 $ python main.py [--csv]
 ```
 
 The `--csv` option is to output the result to a csv file rather than uploading to torque.
+
+## Install as a local library
+
+```
+$ pip3 install -e .
+```
