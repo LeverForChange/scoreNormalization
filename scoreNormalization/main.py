@@ -7,9 +7,9 @@ import numpy as np
 import datetime
 
 #We fetch all application data for the competition through Torque API
-def get_proposal_judge_data(torque, competition, score_type, judge_data_types):
+def get_proposal_judge_data(proposals, score_type, judge_data_types):
     judge_data_by_proposal = {}
-    for proposal in torque.competitions[competition].proposals:
+    for proposal in proposals:
         if (
             ("%s Score" % score_type) not in proposal.keys() or
             "Raw" not in proposal["%s Score" % score_type] or
@@ -28,7 +28,7 @@ def get_proposal_judge_data(torque, competition, score_type, judge_data_types):
                         "rawscore": torque_judge_datum["Score"]["Raw"],
                     })
 
-        judge_data_by_proposal[proposal.key] = {
+        judge_data_by_proposal[proposal["Application #"]] = {
             "judgedata": judge_data,
             "Organization": proposal["Organization Name"],
         }
@@ -72,9 +72,12 @@ def extract_scores(df, judge_data_types):
     return df
 
 def main(torque, competition, score_type, judge_data_types, output_to_csv=False):
+    """This entry point is for acting on the server, rather than in memory.  So it
+    fetches all the data from the server, requiring torque parameters."""
+
     # We read the csv file into a pandas DataFrame
     torque.bulk_fetch(torque.competitions[competition].proposals)
-    df = get_proposal_judge_data(torque, competition, score_type, judge_data_types)
+    df = get_proposal_judge_data(torque.competitions[competition].proposals, competition, score_type, judge_data_types)
     table = pd.DataFrame(df).transpose().reset_index()
 
     # We use the function we defined to extract and process the scores
@@ -97,3 +100,44 @@ def main(torque, competition, score_type, judge_data_types, output_to_csv=False)
             torque.competitions[competition].proposals[record["index"]]["%s Rank" % score_type] = current_rank
             torque.competitions[competition].proposals[record["index"]]["%s Score" % score_type] = current_score
         print("Normalization done, and results are back on torque")
+
+def main_memory(proposals, score_type, judge_data_types):
+    """This entry point is for running in memory on a list of dictionaries (PROPOSALS),
+
+    Then a dictionary is returned of the form:
+    {
+       APPLICATION #: {
+           "Rank": {
+               "LFC Min-Max Normalized" = ...,
+               "LFC Z-Score Normalized" = ...,
+
+           "Score": {
+               "LFC Min-Max Normalized" = ...,
+               "LFC Z-Score Normalized" = ...,
+           }
+       },
+       ...
+    }
+    Those dictionaries are then updated with the scores (destructively)."""
+
+    # We read the csv file into a pandas DataFrame
+    df = get_proposal_judge_data(proposals, score_type, judge_data_types)
+    table = pd.DataFrame(df).transpose().reset_index()
+
+    # We use the function we defined to extract and process the scores
+    table = extract_scores(table, judge_data_types)
+
+    resp = {}
+    for record in table.to_dict(orient='records'):
+        resp[record["index"]] = {
+            "%s Rank" % score_type: {
+                "LFC Min-Max Normalized": record["Rank by Total Min-Max Normalized Score"],
+                "LFC Z-Score Normalized": record["Rank by Total Z-Score Normalized Score"],
+            },
+            "%s Score" % score_type: {
+                "LFC Min-Max Normalized": round(record["Total Min-Max Normalized Score"] * 25, 1),
+                "LFC Z-Score Normalized": round(record["Total Z-Score Normalized Score"], 3)
+            },
+        }
+
+    return resp
