@@ -131,8 +131,8 @@ def main_memory(proposals, score_type, judge_data_types):
     for record in table.to_dict(orient='records'):
         resp[record["index"]] = {
             "%s Rank" % score_type: {
-                "LFC Min-Max Normalized": record["Rank by Total Min-Max Normalized Score"],
-                "LFC Z-Score Normalized": record["Rank by Total Z-Score Normalized Score"],
+                "LFC Min-Max Normalized": round(record["Rank by Total Min-Max Normalized Score"]),
+                "LFC Z-Score Normalized": round(record["Rank by Total Z-Score Normalized Score"]),
             },
             "%s Score" % score_type: {
                 "LFC Min-Max Normalized": round(record["Total Min-Max Normalized Score"] * 25, 1),
