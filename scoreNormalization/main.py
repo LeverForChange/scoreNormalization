@@ -19,14 +19,14 @@ def get_proposal_judge_data(proposals, score_type, judge_data_types):
 
         judge_data = {}
 
-        for judge_data_type in judge_data_types:
-            judge_data[judge_data_type] = []
-            if proposal["%s %s Judge Data" % (score_type, judge_data_type)]:
-                for torque_judge_datum in proposal["%s %s Judge Data" % (score_type, judge_data_type)]["Comments"]:
-                    judge_data[judge_data_type].append({
-                        "judgename": torque_judge_datum["Anonymous Judge Name"],
-                        "rawscore": torque_judge_datum["Score"]["Raw"],
-                    })
+        for trait_judge_data in proposal["%s Data" % score_type]:
+            trait = trait_judge_data["Trait"]
+            judge_data[trait] = []
+            for torque_judge_datum in trait_judge_data["Judge Data"]["Comments"]:
+                judge_data[trait].append({
+                    "judgename": torque_judge_datum["Anonymous Judge Name"],
+                    "rawscore": torque_judge_datum["Score"]["Raw"],
+                })
 
         judge_data_by_proposal[proposal["Application #"]] = {
             "judgedata": judge_data,
